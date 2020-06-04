@@ -42,6 +42,17 @@ function extractPreviewRecipeDetails(recipes_info) {
     })
 }
 
+
+function getRecipeIngredients(recipe_info){
+    let ingredients_result = [];
+    let {extendedIngredients} = recipe_info.data;
+    extendedIngredients.map((ingredient) => {
+        ingredients_result.push(ingredient.originalString)
+    });
+    return ingredients_result;
+
+}
+
 async function getRecipeInformation(recipe_id) {
     return await axios.get(`${api_domain}/${recipe_id}/information`, {
         params: {
@@ -57,9 +68,30 @@ async function getRecipesPreview(recipes_ids_list) {
         promises.push(getRecipeInformation(id));
     });
     let info_res = await Promise.all(promises);
-    return extractRelevantRecipeDetails(info_res);
+    return extractPreviewRecipeDetails(info_res);
 }
 
+async function getRecipeDetails(recipe_id) {
+    let recipe_info = await getRecipeInformation(recipe_id);
+    let {id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, instructions, servings} = recipe_info.data;
+    // let recipe_info_in_array = [];
+    // recipe_info_in_array.push(recipe_info);
+    // let recipe_preview = extractPreviewRecipeDetails(recipe_info_in_array);
+    let ingredients = getRecipeIngredients(recipe_info);
+    return {
+        id: id,
+        title: title,
+        readyInMinutes: readyInMinutes,
+        image: image,
+        popularity: aggregateLikes,
+        vegan: vegan,
+        vegetarian: vegetarian,
+        glutenFree: glutenFree,
+        ingredients: ingredients,
+        instructions: instructions,
+        servings: servings
+    }
+}
 
 // async function getRecipesInfoWithInstructions(recipes_ids_list) {
 //     let promises = [];
@@ -109,5 +141,6 @@ exports.extractRecipesIds = extractRecipesIds;
 exports.extractPreviewRecipeDetails = extractPreviewRecipeDetails;
 exports.getRecipesPreview = getRecipesPreview;
 exports.getRandomThreeRecipes = getRandomThreeRecipes;
+exports.getRecipeDetails = getRecipeDetails;
 
 
