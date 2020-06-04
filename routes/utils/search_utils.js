@@ -21,7 +21,7 @@ async function searchForRecipes(search_params) {
         }
     );
     // keeps only the recipes ids
-    const recipes_ids = recipes_utils.extractRecipesIds(search_response);
+    const recipes_ids = recipes_utils.extractRecipesIds(search_response.data.results);
     // Do another API query for getting recipes details
     let recipes = await recipes_utils.getRecipesInfo(recipes_ids);
     if(!recipes || !recipes.length){
