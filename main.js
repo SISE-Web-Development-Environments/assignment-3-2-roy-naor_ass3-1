@@ -50,7 +50,7 @@ app.use(function (req, res, next) {
 app.get("/alive", (req, res) => res.send("I'm alive"));
 
 // Routings
-//app.use("/user", user);
+app.use("/users", user);
 app.use("/profile", profile);
 app.use("/recipes", recipes);
 app.use(auth);
