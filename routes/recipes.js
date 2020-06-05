@@ -41,10 +41,10 @@ router.get("/search/query/:searchQuery/amount/:num",  async (req, res, next) => 
   })
 });
 
-router.get("/Information", async (req, res, next) => {
+router.get("/:recipeId", async (req, res, next) => {
   try {
-    const recipe = await getRecipeInfo(req.query.recipe_id);
-    res.send({ data: recipe.data });
+    const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
+    res.send(recipe);
   } catch (error) {
     next(error);
   }
