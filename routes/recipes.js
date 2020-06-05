@@ -3,6 +3,7 @@ var router = express.Router();
 const axios = require("axios");
 const search_util = require("./utils/search_utils");
 const recipes_utils = require("./utils/recipes_utils");
+const DButils = require("./utils/DButils");
 
 
 
@@ -41,9 +42,20 @@ router.get("/search/query/:searchQuery/amount/:num",  async (req, res, next) => 
   })
 });
 
+/**
+ * This path recieve a full details of a recipe by its id
+ */
 router.get("/:recipeId", async (req, res, next) => {
   try {
     const recipe = await recipes_utils.getRecipeDetails(req.params.recipeId);
+    //TODO: If the user is exists (and not a guest), update the table of watchedRecipes
+    if (req.session && req.session.user_id) {
+      DButils.execQuery("SELECT user_id FROM users").then((users) => {
+        if (users.find((x) => x.user_id === req.session.user_id)) {
+          DButils.execQuery(`INSERT into WatchedRecipes values ('${req.session.user_id}',${req.params.recipeId})`).catch(err=>next(err));
+        }
+      }).catch(err => next(err));
+    }
     res.send(recipe);
   } catch (error) {
     next(error);
