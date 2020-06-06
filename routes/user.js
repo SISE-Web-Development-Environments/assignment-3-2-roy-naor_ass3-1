@@ -60,4 +60,18 @@ router.get('/lastWatched', async (req, res) => {
     next(error);
   }
 });
+
+router.post('/favorites', async (req,res,next) => {
+  try{
+    let user_id = req.session.user_id;
+    let recipe_id = req.body.recipe_id;
+    await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}',${recipe_id})`);
+    res.status(200).send("The Recipe successfully saved as favorite");
+    } catch(error){
+    next(error);
+  }
+})
+
+
+
 module.exports = router;
