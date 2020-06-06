@@ -18,7 +18,13 @@ function extractRecipesIds(recipes) {
  * @param {*} recipes_info 
  */
 function extractPreviewRecipeDetails(recipes_info) {
+
     return recipes_info.map((recipe_info) => {
+        //check the data type so it can work with diffrent types of data
+        let data = recipe_info;
+        if (recipe_info.data) {
+            data = recipe_info.data;
+        }
         const {
             id,
             title,
@@ -28,7 +34,7 @@ function extractPreviewRecipeDetails(recipes_info) {
             vegan,
             vegetarian,
             glutenFree,
-        } = recipe_info.data;
+        } = data;
         return {
             id: id,
             title: title,
@@ -43,9 +49,9 @@ function extractPreviewRecipeDetails(recipes_info) {
 }
 
 
-function getRecipeIngredients(recipe_info){
+function getRecipeIngredients(recipe_info) {
     let ingredients_result = [];
-    let {extendedIngredients} = recipe_info.data;
+    let { extendedIngredients } = recipe_info.data;
     extendedIngredients.map((ingredient) => {
         ingredients_result.push(ingredient.originalString)
     });
@@ -73,7 +79,7 @@ async function getRecipesPreview(recipes_ids_list) {
 
 async function getRecipeDetails(recipe_id) {
     let recipe_info = await getRecipeInformation(recipe_id);
-    let {id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, instructions, servings} = recipe_info.data;
+    let { id, title, readyInMinutes, image, aggregateLikes, vegan, vegetarian, glutenFree, instructions, servings } = recipe_info.data;
     // let recipe_info_in_array = [];
     // recipe_info_in_array.push(recipe_info);
     // let recipe_preview = extractPreviewRecipeDetails(recipe_info_in_array);
@@ -130,11 +136,11 @@ async function getRandomRecipes() {
 
 async function getRandomThreeRecipes() {
     let random_pool = await getRandomRecipes();
-    let filterd_random_pool = random_pool.data.recipes.filter((random) => random.instructions != "");
-    if(filterd_random_pool.length < 3){
+    let filterd_random_pool = random_pool.data.recipes.filter((random) => (random.instructions != "") && (random.image != ""));
+    if (filterd_random_pool.length < 3) {
         return getRandomThreeRecipes();
     }
-    return [filterd_random_pool[0], filterd_random_pool[1], filterd_random_pool[2]];
+    return extractPreviewRecipeDetails([filterd_random_pool[0], filterd_random_pool[1], filterd_random_pool[2]]);
 }
 
 exports.extractRecipesIds = extractRecipesIds;
