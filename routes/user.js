@@ -48,4 +48,16 @@ router.post('/watched/:recipeId', async (req, res) => {
   }
 });
 
+router.get('/lastWatched', async (req, res) => {
+  try{
+    let result = [];
+    const user_id = req.user_id;
+    const lastThreeRecipes = await user_utils.getLastThreeWatchedRecipes(user_id);
+    lastThreeRecipes.map((element) => result.push(element.recipe_id));
+    console.log(result[0]);
+    res.status(200).send(result);
+  }catch(error){
+    next(error);
+  }
+});
 module.exports = router;

@@ -42,5 +42,17 @@ async function markRecipeAsWatched(user_id, recipe_id) {
     ('${user_id}',${recipe_id})`);
 }
 
+async function getLastThreeWatchedRecipes(user_id) {
+    const result = await DButils.execQuery(
+    `SELECT TOP 3 recipe_id
+     FROM WatchedRecipes
+    WHERE user_id= '${user_id}' 
+    ORDER BY time DESC`);
+
+    return result;
+}
+
+
 exports.getUserInfoOnRecipes = getUserInfoOnRecipes;
 exports.markRecipeAsWatched = markRecipeAsWatched;
+exports.getLastThreeWatchedRecipes = getLastThreeWatchedRecipes;
