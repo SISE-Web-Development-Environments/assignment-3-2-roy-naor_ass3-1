@@ -1,8 +1,15 @@
-CREATE TABLE [dbo].[recipes](
-	[recipe_id] [UNIQUEIDENTIFIER] NOT NULL default NEWID(),
-	[author] [UNIQUEIDENTIFIER] NOT NULL,
-	[recipe_name] [varchar](300) NOT NULL,
-	PRIMARY KEY (author, recipe_name),
-	FOREIGN KEY (author) REFERENCES users(user_id)
+CREATE TABLE [dbo].[PersonalRecipes](
+	[user_id] [UNIQUEIDENTIFIER] NOT NULL default NEWID(),
+	[recipe_id] int NOT NULL,
+	[title] [varchar](50),
+	[readyInMinutes] int, 
+	[profilePic] [varchar](max),
+	[popularity] int,
+	[vegan] bit,
+	[vegeterian] bit,
+	[glutenFree] bit,
+	[instructions] text,
+	[servings] int,
+	PRIMARY KEY (user_id, recipe_id),
+	FOREIGN KEY (user_id) REFERENCES users(user_id)
 )
-

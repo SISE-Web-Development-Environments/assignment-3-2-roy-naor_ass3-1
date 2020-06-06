@@ -6,7 +6,7 @@ const bcrypt = require("bcrypt");
 
 //#region complex
 //Authenticate all incoming requests
-router.use("/addPersonalRecipe", function (req, res, next) {
+router.use("/", function (req, res, next) {
   if (req.session && req.session.user_id) {
     // or findOne Stored Procedure
     DButils.execQuery("SELECT user_id FROM users").then((users) => {
@@ -45,7 +45,7 @@ router.post('/addfavorites/:recipeid', async (req,res,next) => {
   try{
     let user_id = req.session.user_id;
     let recipe_id = req.params.recipe_id;
-    await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}','${recipe_id}')`);
+    await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}',${recipe_id})`);
     res.sendStatus(200);
   } catch(error){
     next(error); //needs to change?
@@ -75,9 +75,38 @@ router.post('/addfavorites/:recipeid', async (req,res,next) => {
 // });
 
 
-// router.get("/personalRecipes", function (req, res) {
-//   res.send(req.originalUrl);
-// });
+router.get("/personalRecipes", function (req, res) {
+  try{
+    let user_id = req.session.user_id;
+    let personal_recipes = {};
+    const recipes = await DButils.execQuery(`select recipe_id from PersonalRecipes where user_id='${user_id}'`);
+    //if doesn't work:
+    //`select recipe_id from PersonalRecipes where user_id=cast('${user_id}' as UNIQUEIDENTIFIER)`
 
+    for(let index = 0; index < recipes.length; index++){
+        let recipe = await recipe_utils.getRecipeInformation(recipes[index].recipe_id);
+        let preview = recipe_utils.getRecipesPreview(recipe.data);
+        personal_recipes[index+1] = preview
+    };
+    res.send(personal_recipes);
+  } catch(error){
+    next(error); //needs to change?
+  }
+});
+
+router.post('/addPersonalRecipe/:recipeid', async (req,res,next) => {
+
+
+
+
+  // try{
+  //   let user_id = req.session.user_id;
+  //   let recipe_id = req.params.recipe_id;
+  //   await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}','${recipe_id}')`);
+  //   res.sendStatus(200);
+  // } catch(error){
+  //   next(error); //needs to change?
+  // }
+})
 
 module.exports = router;
