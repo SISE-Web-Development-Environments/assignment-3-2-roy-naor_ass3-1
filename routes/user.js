@@ -2,6 +2,7 @@ var express = require("express");
 var router = express.Router();
 const DButils = require("./utils/DButils");
 const user_utils = require("./utils/user_utils");
+const recipe_utils = require("./utils/recipes_utils");
 const bcrypt = require("bcrypt");
 
 /**
@@ -63,8 +64,8 @@ router.get('/lastWatched', async (req, res) => {
 
 router.post('/favorites', async (req,res,next) => {
   try{
-    let user_id = req.session.user_id;
-    let recipe_id = req.body.recipe_id;
+    const user_id = req.session.user_id;
+    const recipe_id = req.body.recipe_id;
     await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}',${recipe_id})`);
     res.status(200).send("The Recipe successfully saved as favorite");
     } catch(error){
@@ -72,6 +73,23 @@ router.post('/favorites', async (req,res,next) => {
   }
 })
 
-
+router.get('/favorites', async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id;
+    let favorite_recipes = {};
+    const recipes_id = await DButils.execQuery(`select recipe_id from FavoriteRecipes where user_id='${user_id}'`);
+    let recipes_id_array = [];
+    recipes_id.map((element) => recipes_id_array.push(element.recipe_id)); //extracting the recipe ids into array
+    const results = await recipe_utils.getRecipesPreview(recipes_id_array);
+    // for(let index = 0; index < recipes.length; index++){
+    //     let recipe = await recipe_utils.getRecipeInformation(recipes[index]);
+    //     let preview = recipe_utils.getRecipesPreview(recipe.data);
+    //     favorite_recipes[index+1] = preview
+    // };
+    res.status(200).send(results);
+  } catch(error){
+    next(error); 
+  }
+});
 
 module.exports = router;
