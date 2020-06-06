@@ -29,10 +29,21 @@ router.get('/recipeInfo/:ids', async (req, res) => {
   try {
     const recipes_ids = JSON.parse(req.params.ids);
     const user_id = req.user_id;
-    console.log(recipes_ids, user_id);
+ //   console.log(recipes_ids, user_id);
     const userInfo = await user_utils.getUserInfoOnRecipes(user_id, recipes_ids);
     res.send(userInfo);
   } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/watched/:recipeId', async (req, res) => {
+  try{
+    const recipe_id = req.params.recipeId;
+    const user_id = req.user_id;
+    await user_utils.markRecipeAsWatched(user_id, recipe_id);
+    res.status(200).send("Marked successfully the recipe as watched");
+  }catch(error){
     next(error);
   }
 });

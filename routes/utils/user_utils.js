@@ -29,4 +29,18 @@ async function getUserInfoOnRecipes(user_id, recipes_ids) {
     return result;
 }
 
+async function markRecipeAsWatched(user_id, recipe_id) {
+    await DButils.execQuery(`IF EXISTS
+    (SELECT * FROM WatchedRecipes WHERE user_id = '${user_id}'
+    and recipe_id=${recipe_id})
+        UPDATE WatchedRecipes
+        SET time = GETDATE()
+        WHERE user_id = '${user_id}'
+    and recipe_id=${recipe_id}
+    ELSE
+        insert into WatchedRecipes (user_id,recipe_id) values 
+    ('${user_id}',${recipe_id})`);
+}
+
 exports.getUserInfoOnRecipes = getUserInfoOnRecipes;
+exports.markRecipeAsWatched = markRecipeAsWatched;
