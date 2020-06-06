@@ -72,7 +72,7 @@ router.post('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user_id;
     const recipe_id = req.body.recipeId;
-    await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}',${recipe_id})`);
+    await user_utils.markAsFavorite(user_id,recipe_id);
     res.status(200).send("The Recipe successfully saved as favorite");
     } catch(error){
     next(error);
@@ -86,11 +86,53 @@ router.get('/favorites', async (req,res,next) => {
   try{
     const user_id = req.session.user_id;
     let favorite_recipes = {};
-    const recipes_id = await DButils.execQuery(`select recipe_id from FavoriteRecipes where user_id='${user_id}'`);
+    const recipes_id = await user_utils.getFavoriteRecipes(user_id);
     let recipes_id_array = [];
     recipes_id.map((element) => recipes_id_array.push(element.recipe_id)); //extracting the recipe ids into array
     const results = await recipe_utils.getRecipesPreview(recipes_id_array);
     res.status(200).send(results);
+  } catch(error){
+    next(error); 
+  }
+});
+
+
+/**
+ * This path returns a preview of the recipes that were added to the website by the user
+ */
+router.get('/personalRecipes', async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id;
+    let ingredients_array = [];
+    const personal_recipes = await user_utils.getPersonalRecipes(user_id);
+
+    res.status(200).send(personal_recipes);
+  } catch(error){
+    next(error); 
+  }
+});
+
+/**
+ * This path returns the full view of a recipe that was added to the website by the user
+ */
+router.get('/personalRecipes/:personalRecipeID', async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id;
+    const recipe_id = req.params.personalRecipeID;
+    let ingredients_array = [];
+    let instructions_array = [];
+    const personal_recipes = await user_utils.getPersonalRecipe(user_id,recipe_id);
+
+    const recipe_ingredients = await user_utils.getRecipeIngredients(recipe_id);
+    recipe_ingredients.map((element) => ingredients_array.push(element.ingredient)); 
+
+    const recipe_instructions = await user_utils.getRecipeInstructions(recipe_id);
+    recipe_instructions.map((element) => instructions_array.push(element.description));
+    
+    personal_recipes[0].ingredients = ingredients_array;
+    personal_recipes[0].instructions = instructions_array;  
+
+    res.status(200).send(personal_recipes[0]);
   } catch(error){
     next(error); 
   }

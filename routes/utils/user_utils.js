@@ -53,6 +53,52 @@ async function getLastThreeWatchedRecipes(user_id) {
 }
 
 
+async function getPersonalRecipes(user_id){
+    const personal_recipes = await DButils.execQuery(
+        `select recipe_id as id, title, readyInMinutes, image, popularity, vegan, vegetarian, glutenFree
+        from PersonalRecipes where user_id='${user_id}'`);
+
+    return personal_recipes;
+}
+
+async function getPersonalRecipe(user_id, recipe_id){
+    const personal_recipe = await DButils.execQuery(`select recipe_id as id, title, readyInMinutes, image, popularity, vegan, vegetarian, glutenFree, servings
+     from PersonalRecipes where user_id='${user_id}' and recipe_id = ${recipe_id}`);
+
+     return personal_recipe;
+}
+
+
+async function getRecipeIngredients(recipe_id){
+    const recipe_ingredients = await DButils.execQuery(
+        `select ingredient from RecipeIngredients WHERE recipe_id = ${recipe_id}`);
+
+    return recipe_ingredients;
+}
+
+async function getRecipeInstructions(recipe_id){
+    const recipe_instructions = await DButils.execQuery(
+        `select description from RecipeInstructions where recipe_id = ${recipe_id} order by serial_number`);
+
+    return recipe_instructions;
+}
+
+
+async function markAsFavorite(user_id, recipe_id){
+    await DButils.execQuery(`insert into FavoriteRecipes values ('${user_id}',${recipe_id})`);
+}
+
+async function getFavoriteRecipes(user_id){
+    const recipes_id = await DButils.execQuery(`select recipe_id from FavoriteRecipes where user_id='${user_id}'`);
+    return recipes_id;
+}
+
 exports.getUserInfoOnRecipes = getUserInfoOnRecipes;
 exports.markRecipeAsWatched = markRecipeAsWatched;
 exports.getLastThreeWatchedRecipes = getLastThreeWatchedRecipes;
+exports.getPersonalRecipe = getPersonalRecipe;
+exports.getPersonalRecipes = getPersonalRecipes;
+exports.getRecipeIngredients = getRecipeIngredients;
+exports.getRecipeInstructions = getRecipeInstructions;
+exports.markAsFavorite = markAsFavorite;
+exports.getFavoriteRecipes = getFavoriteRecipes;
