@@ -138,4 +138,35 @@ router.get('/personalRecipes/:personalRecipeID', async (req,res,next) => {
   }
 });
 
+/**
+ * This path returns the full view of all the family recipes that were added by the user
+ */
+router.get('/familyRecipes' , async (req,res,next) => {
+  try{
+    const user_id = req.session.user_id; 
+    let ingredients_array = [];
+    let instructions_array = [];
+
+    const family_recipes = await user_utils.getFamilyRecipes(user_id);
+
+    for(i=0; i<family_recipes.length; i++){
+      let recipe_ingredients = await user_utils.getRecipeIngredients(family_recipes[i].id);
+      recipe_ingredients.map((element) => ingredients_array.push(element.ingredient)); 
+  
+      let recipe_instructions = await user_utils.getRecipeInstructions(family_recipes[i].id);
+      recipe_instructions.map((element) => instructions_array.push(element.description));
+
+      family_recipes[i].ingredients = ingredients_array;
+      family_recipes[i].instructions = instructions_array;
+
+      ingredients_array = new Array();
+      instructions_array = new Array();
+    }
+
+    res.status(200).send(family_recipes);
+  } catch(error){
+    next(error); 
+  }
+});
+
 module.exports = router;
